@@ -14,7 +14,7 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: "Missing API credentials" });
     }
 
-    const endpoint = "https://api.kucoin.com/api/v1/contracts/active"; // The active contracts endpoint
+    const endpoint = "https://api-futures.kucoin.com"; // The active contracts endpoint
     const method = "GET";
     const requestPath = "/api/v1/contracts/active"; // Path for the active contracts API
     const timestamp = Date.now();
