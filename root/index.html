@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KuCoin API Data</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .data-container { margin: 20px; }
+        .data { white-space: pre-wrap; background: #f9f9f9; padding: 10px; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <h1>KuCoin API Data</h1>
+    <button onclick="fetchData()">Fetch Data</button>
+    <div class="data-container">
+        <h2>Response:</h2>
+        <div class="data" id="responseData">No data yet.</div>
+    </div>
+    
+    <script>
+        async function fetchData() {
+            const apiKey = "YOUR_API_KEY"; // Replace with your API key
+            const apiSecret = "YOUR_API_SECRET"; // Replace with your API secret
+            const passphrase = "YOUR_PASSPHRASE"; // Replace with your passphrase
+
+            // Endpoint URL
+            const endpoint = "https://api.kucoin.com/api/v1/orders";
+
+            // Create a nonce (timestamp)
+            const timestamp = Date.now();
+
+            // Prepare the payload for signing
+            const method = "POST";
+            const requestPath = "/api/v1/orders";
+            const body = JSON.stringify({}); // Add body payload here if required
+
+            // Create a signature
+            const crypto = window.crypto || require('crypto');
+            const message = timestamp + method + requestPath + body;
+            const signature = crypto.createHmac('sha256', apiSecret).update(message).digest('base64');
+            const passphraseSignature = crypto.createHmac('sha256', apiSecret).update(passphrase).digest('base64');
+
+            try {
+                // Make the API request
+                const response = await axios.post(endpoint, body, {
+                    headers: {
+                        'KC-API-KEY': apiKey,
+                        'KC-API-SIGN': signature,
+                        'KC-API-TIMESTAMP': timestamp,
+                        'KC-API-PASSPHRASE': passphraseSignature,
+                        'KC-API-KEY-VERSION': '2',
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                // Display the response
+                document.getElementById('responseData').textContent = JSON.stringify(response.data, null, 2);
+
+            } catch (error) {
+                // Handle errors
+                document.getElementById('responseData').textContent = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
