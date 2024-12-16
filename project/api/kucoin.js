@@ -1,5 +1,6 @@
-import crypto from "crypto";
-import axios from "axios";
+
+const crypto = require("crypto");
+const axios = require("axios");
 
 export default async function handler(req, res) {
     if (req.method !== "POST") {
@@ -10,6 +11,10 @@ export default async function handler(req, res) {
     const apiSecret = process.env.KUCOIN_API_SECRET;
     const passphrase = process.env.KUCOIN_PASSPHRASE;
 
+    if (!apiKey || !apiSecret || !passphrase) {
+        return res.status(500).json({ error: "Missing API credentials" });
+    }
+
     const endpoint = "https://api.kucoin.com/api/v1/orders";
     const method = "POST";
     const requestPath = "/api/v1/orders";
@@ -17,10 +22,12 @@ export default async function handler(req, res) {
     const timestamp = Date.now();
 
     try {
+        // Generate the signature
         const message = `${timestamp}${method}${requestPath}${JSON.stringify(body)}`;
         const signature = crypto.createHmac("sha256", apiSecret).update(message).digest("base64");
         const passphraseSignature = crypto.createHmac("sha256", apiSecret).update(passphrase).digest("base64");
 
+        // Send the request to KuCoin
         const response = await axios.post(endpoint, body, {
             headers: {
                 "KC-API-KEY": apiKey,
