@@ -1,4 +1,3 @@
-
 const crypto = require("crypto");
 const axios = require("axios");
 
@@ -11,15 +10,18 @@ export default async function handler(req, res) {
     const apiSecret = "4da6d7ef-1e20-4d0b-b6a3-c2604190c6f5";
     const passphrase = "kubot@test1";
 
-    if (!apiKey || !apiSecret || !passphrase) {
-        return res.status(500).json({ error: "Missing API credentials" });
-    }
-
     const endpoint = "https://api.kucoin.com/api/v1/orders";
     const method = "POST";
     const requestPath = "/api/v1/orders";
-    const body = req.body || {};
     const timestamp = Date.now();
+
+    const body = {
+        clientOid: `order_${timestamp}`, // Unique ID
+        side: "buy",                    // "buy" or "sell"
+        symbol: "BTC-USDT",             // Trading pair
+        type: "market",                 // "market" or "limit"
+        size: "0.01",                   // Order size
+    };
 
     try {
         // Generate the signature
@@ -28,7 +30,7 @@ export default async function handler(req, res) {
         const passphraseSignature = crypto.createHmac("sha256", apiSecret).update(passphrase).digest("base64");
 
         // Send the request to KuCoin
-        const response = await axios.post(endpoint, body, {
+        const response = await axios.post(endpoint, JSON.stringify(body), {
             headers: {
                 "KC-API-KEY": apiKey,
                 "KC-API-SIGN": signature,
@@ -42,8 +44,9 @@ export default async function handler(req, res) {
         res.status(200).json(response.data);
     } catch (error) {
         console.error("Error fetching data from KuCoin:", error.message);
-        res.status(500).json({ error: error.message });
+        res.status(error.response?.status || 500).json({ error: error.response?.data || error.message });
     }
 }
+
 
    
