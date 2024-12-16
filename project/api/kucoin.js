@@ -7,9 +7,9 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: "Method not allowed" });
     }
 
-    const apiKey = process.env.KUCOIN_API_KEY;
-    const apiSecret = process.env.KUCOIN_API_SECRET;
-    const passphrase = process.env.KUCOIN_PASSPHRASE;
+    const apiKey = "675f44a9421a720001d5c76d";
+    const apiSecret = "4da6d7ef-1e20-4d0b-b6a3-c2604190c6f5";
+    const passphrase = "kubot@test1";
 
     if (!apiKey || !apiSecret || !passphrase) {
         return res.status(500).json({ error: "Missing API credentials" });
